@@ -367,3 +367,14 @@ export async function getInfinitePosts({ pageParam }: { pageParam: number }) {
     console.log(error);
   }
 }
+
+export async function getUsers() {
+    const users = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.userCollectionId,
+      [Query.orderAsc("$createdAt")]
+    )
+    if(!users) throw Error;
+    return users;
+}
+
