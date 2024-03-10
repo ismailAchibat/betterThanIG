@@ -15,7 +15,7 @@ const PostCard = ({ post }: PostCardProps) => {
     <div className="post-card">
       <div className="flex-between">
         <div className="flex items-center gap-3">
-          <Link to={`/porfile/${post.creator.$id}`}>
+          <Link to={`/profile/${post.creator.$id}`}>
             <img
               src={
                 post?.creator?.imageUrl ||
