@@ -2,14 +2,27 @@ import { Routes, Route } from "react-router-dom";
 
 import "./globals.css";
 import SigninForm from "./_auth/forms/SigninForm";
-import { CreatePost, EditPost, Explore, Home, PostDetails, Profile, Saved, UpdateProfile } from "./_root/pages";
+import {
+  CreatePost,
+  EditPost,
+  Explore,
+  Home,
+  PostDetails,
+  Profile,
+  Saved,
+  UpdateProfile,
+} from "./_root/pages";
 import SignupForm from "./_auth/forms/SignupForm";
 import AuthLayout from "./_auth/AuthLayout";
 import RootLayout from "./_root/RootLayout";
 import { Toaster } from "@/components/ui/toaster";
 import AllUsers from "./_root/pages/AllUsers";
+import { useEffect } from "react";
 
 const App = () => {
+  useEffect(() => {
+    document.title = "BetterThanIG";
+  }, []);
   return (
     <main className="flex h-screen">
       <Routes>
