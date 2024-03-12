@@ -13,10 +13,10 @@ const AuthLayout = () => {
             <Outlet />
           </section>
 
-          <img 
-            src="/assets/images/side-img.svg" 
+          <img
+            src="public/assets/images/btig_sideImg2.png"
             alt="logo"
-            className="hidden xl:block h-screen w-1/2 object-cover bg-no-repeat"
+            className="hidden xl:block border-2 border-gray-800 rounded-lg"
           />
         </>
       )}

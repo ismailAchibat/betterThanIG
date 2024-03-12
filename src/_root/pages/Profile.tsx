@@ -7,14 +7,18 @@ import {
   useLocation,
 } from "react-router-dom";
 
-
 import { LikedPosts } from "@/_root/pages";
 import { useUserContext } from "@/context/AuthConstext";
 import Loader from "@/components/shared/Loader";
 import { Button } from "@/components/ui/button";
 import GridPostList from "@/components/shared/GridPostList";
 import { useGetUserById } from "@/lib/react-query/queriesAndMutations";
-
+import { useState } from "react";
+import {
+  AddFollowerOfUserById,
+  RemoveFollowerOfUserById,
+  checkIsFollowing,
+} from "@/lib/appwrite/api";
 
 interface StabBlockProps {
   value: string | number;
@@ -32,15 +36,36 @@ const Profile = () => {
   const { id } = useParams();
   const { user } = useUserContext();
   const { pathname } = useLocation();
-
   const { data: currentUser } = useGetUserById(id || "");
 
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [loading, setLoading] = useState(false);
+  
   if (!currentUser)
     return (
       <div className="flex-center w-full h-full">
         <Loader />
       </div>
     );
+
+  const handleFollowToggle = async () => {
+    try {
+      setLoading(true);
+      const following = await checkIsFollowing(user.id, currentUser?.id);
+      setIsFollowing(following);
+      if (isFollowing) {
+        await RemoveFollowerOfUserById(user.id, currentUser?.id);
+        setIsFollowing(false);
+      } else {
+        await AddFollowerOfUserById(user.id, currentUser.$id);
+        setIsFollowing(true);
+      }
+    } catch (error) {
+      console.error("Error toggling follow:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="profile-container">
@@ -65,8 +90,14 @@ const Profile = () => {
 
             <div className="flex gap-8 mt-10 items-center justify-center xl:justify-start flex-wrap z-20">
               <StatBlock value={currentUser.posts.length} label="Posts" />
-              <StatBlock value={20} label="Followers" />
-              <StatBlock value={20} label="Following" />
+              <StatBlock
+                value={currentUser.followers.length}
+                label="Followers"
+              />
+              <StatBlock
+                value={currentUser.following.length}
+                label="Following"
+              />
             </div>
 
             <p className="small-medium md:base-medium text-center xl:text-left mt-7 max-w-screen-sm">
@@ -80,7 +111,8 @@ const Profile = () => {
                 to={`/update-profile/${currentUser.$id}`}
                 className={`h-12 bg-dark-4 px-5 text-light-1 flex-center gap-2 rounded-lg ${
                   user.id !== currentUser.$id && "hidden"
-                }`}>
+                }`}
+              >
                 <img
                   src={"/assets/icons/edit.svg"}
                   alt="edit"
@@ -93,8 +125,13 @@ const Profile = () => {
               </Link>
             </div>
             <div className={`${user.id === id && "hidden"}`}>
-              <Button type="button" className="shad-button_primary px-8">
-                Follow
+              <Button
+                type="button"
+                className="shad-button_primary px-8"
+                onClick={handleFollowToggle}
+                disabled={loading}
+              >
+                {loading ? "Updating..." : isFollowing ? "Unfollow" : "Follow"}
               </Button>
             </div>
           </div>
@@ -107,7 +144,8 @@ const Profile = () => {
             to={`/profile/${id}`}
             className={`profile-tab rounded-l-lg ${
               pathname === `/profile/${id}` && "!bg-dark-3"
-            }`}>
+            }`}
+          >
             <img
               src={"/assets/icons/posts.svg"}
               alt="posts"
@@ -120,7 +158,8 @@ const Profile = () => {
             to={`/profile/${id}/liked-posts`}
             className={`profile-tab rounded-r-lg ${
               pathname === `/profile/${id}/liked-posts` && "!bg-dark-3"
-            }`}>
+            }`}
+          >
             <img
               src={"/assets/icons/like.svg"}
               alt="like"

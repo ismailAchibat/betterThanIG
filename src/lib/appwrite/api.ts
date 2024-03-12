@@ -444,3 +444,110 @@ export async function updateUser(user: IUpdateUser) {
     console.log(error);
   }
 }
+
+export async function checkIsFollowing(currentUserId: string, userIdToFollow: string){
+  try {
+    const currentUser = await getUserById(currentUserId);
+    if(currentUser.following.includes(userIdToFollow)){
+      return true;
+    }
+    else{
+      return false;
+    }
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+}
+
+export async function AddFollowerOfUserById(currentUserId: string, userIdToFollow: string) {
+  try {
+    const userToFollow = await databases.getDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.userCollectionId,
+      userIdToFollow
+    );
+
+    const currentUser = await databases.getDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.userCollectionId,
+      currentUserId
+    );
+
+    if (!userToFollow || !currentUser) {
+      throw Error;
+    }
+
+    userToFollow.followers.push(currentUserId);
+
+    const updatedUserToFollow = await databases.updateDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.userCollectionId,
+      userIdToFollow,
+      {
+        followers: userToFollow.followers
+      }
+    );
+    
+    currentUser.following.push(userIdToFollow);
+
+    await databases.updateDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.userCollectionId,
+      currentUserId,
+      {
+        followers: currentUser.following
+      }
+    );
+    
+    return updatedUserToFollow;
+  } catch (error) {
+    throw new Error;
+  }
+}
+
+export async function RemoveFollowerOfUserById(currentUserId: string, userIdToUnFollow: string) {
+  try {
+    const userToFollow = await databases.getDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.userCollectionId,
+      userIdToUnFollow
+    );
+
+    const currentUser = await databases.getDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.userCollectionId,
+      currentUserId
+    );
+
+    if (!userToFollow || !currentUser) {
+      throw Error;
+    }
+
+    userToFollow.followers.filter((item: string) => item !== currentUserId);
+
+    const updatedUserToFollow = await databases.updateDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.userCollectionId,
+      userIdToUnFollow,
+      {
+        followers: userToFollow.followers
+      }
+    );
+    
+    currentUser.following.filter((item: string) => item !== userIdToUnFollow);
+
+    await databases.updateDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.userCollectionId,
+      currentUserId,
+      {
+        followers: currentUser.following
+      }
+    );
+    
+    return updatedUserToFollow;
+  } catch (error) {
+    throw new Error;
+  }
+}
