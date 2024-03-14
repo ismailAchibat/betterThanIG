@@ -1,6 +1,7 @@
 import { ID, Query } from "appwrite";
 import { INewPost, INewUser, IUpdatePost, IUpdateUser } from "@/types";
 import { account, appwriteConfig, avatars, databases, storage } from "./config";
+import { useUpdateUser } from './../react-query/queriesAndMutations';
 
 
 export async function createUserAccount(user: INewUser){
@@ -460,94 +461,31 @@ export async function checkIsFollowing(currentUserId: string, userIdToFollow: st
   }
 }
 
-export async function AddFollowerOfUserById(currentUserId: string, userIdToFollow: string) {
+
+export async function followUser(userIdToFollow: string, followersArray: string[], currentUser: string, followingArray: string[]) {
   try {
-    const userToFollow = await databases.getDocument(
-      appwriteConfig.databaseId,
-      appwriteConfig.userCollectionId,
-      userIdToFollow
-    );
-
-    const currentUser = await databases.getDocument(
-      appwriteConfig.databaseId,
-      appwriteConfig.userCollectionId,
-      currentUserId
-    );
-
-    if (!userToFollow || !currentUser) {
-      throw Error;
-    }
-
-    userToFollow.followers.push(currentUserId);
-
-    const updatedUserToFollow = await databases.updateDocument(
+    const updatedUser = await databases.updateDocument(
       appwriteConfig.databaseId,
       appwriteConfig.userCollectionId,
       userIdToFollow,
       {
-        followers: userToFollow.followers
+        followers: followersArray,
       }
-    );
-    
-    currentUser.following.push(userIdToFollow);
+     ) 
 
-    await databases.updateDocument(
+     await databases.updateDocument(
       appwriteConfig.databaseId,
       appwriteConfig.userCollectionId,
-      currentUserId,
+      currentUser,
       {
-        followers: currentUser.following
+        following: followingArray,
       }
-    );
+     )
+      if(!updatedUser) throw Error;
+
+      return updatedUser;
     
-    return updatedUserToFollow;
   } catch (error) {
-    throw new Error;
-  }
-}
-
-export async function RemoveFollowerOfUserById(currentUserId: string, userIdToUnFollow: string) {
-  try {
-    const userToFollow = await databases.getDocument(
-      appwriteConfig.databaseId,
-      appwriteConfig.userCollectionId,
-      userIdToUnFollow
-    );
-
-    const currentUser = await databases.getDocument(
-      appwriteConfig.databaseId,
-      appwriteConfig.userCollectionId,
-      currentUserId
-    );
-
-    if (!userToFollow || !currentUser) {
-      throw Error;
-    }
-
-    userToFollow.followers.filter((item: string) => item !== currentUserId);
-
-    const updatedUserToFollow = await databases.updateDocument(
-      appwriteConfig.databaseId,
-      appwriteConfig.userCollectionId,
-      userIdToUnFollow,
-      {
-        followers: userToFollow.followers
-      }
-    );
-    
-    currentUser.following.filter((item: string) => item !== userIdToUnFollow);
-
-    await databases.updateDocument(
-      appwriteConfig.databaseId,
-      appwriteConfig.userCollectionId,
-      currentUserId,
-      {
-        followers: currentUser.following
-      }
-    );
-    
-    return updatedUserToFollow;
-  } catch (error) {
-    throw new Error;
+    console.log(error);
   }
 }
