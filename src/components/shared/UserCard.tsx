@@ -2,10 +2,23 @@ import { Models } from "appwrite";
 import { Link } from "react-router-dom";
 
 import { Button } from "../ui/button";
+import PostStats from "./PostStats";
 
 type UserCardProps = {
   user: Models.Document;
 };
+
+interface StabBlockProps {
+  value: string | number;
+  label: string;
+}
+
+const StatBlock = ({ value, label }: StabBlockProps) => (
+  <div className="flex-center gap-2">
+    <p className="small-semibold lg:body-bold text-primary-500">{value}</p>
+    <p className="small-medium lg:base-medium text-light-2">{label}</p>
+  </div>
+);
 
 const UserCard = ({ user }: UserCardProps) => {
   return (
@@ -25,9 +38,10 @@ const UserCard = ({ user }: UserCardProps) => {
         </p>
       </div>
 
-      <Button type="button" size="sm" className="shad-button_primary px-5">
+      {/* <Button type="button" size="sm" className="shad-button_primary px-5">
         Follow
-      </Button>
+      </Button> */}
+      <StatBlock value={user.followers.length} label="Followers" />
     </Link>
   );
 };
