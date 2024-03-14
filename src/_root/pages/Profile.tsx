@@ -13,7 +13,7 @@ import Loader from "@/components/shared/Loader";
 import { Button } from "@/components/ui/button";
 import GridPostList from "@/components/shared/GridPostList";
 import { useGetUserById } from "@/lib/react-query/queriesAndMutations";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { followUser } from "@/lib/appwrite/api";
 import { checkIsFollowing } from "@/lib/utils";
 
@@ -36,9 +36,23 @@ const Profile = () => {
   const { data: profileUser } = useGetUserById(id || "");
 
   const followerList = profileUser?.followers;
-  const [followersLi, setFollowersLi] = useState(followerList || []);
+  const [followersLi, setFollowersLi] = useState<string[]>([]);
+
   const followingList = user.following;
-  const [followingLi, setFollowingLi] = useState(followingList || []);
+  const [followingLi, setFollowingLi] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (followerList) {
+      setFollowersLi(followerList);
+    }
+  }, [followerList]);
+
+  useEffect(() => {
+    if (followingList) {
+      setFollowingLi(followingList);
+    }
+  }, [followingList]);
+
   const [loading, setLoading] = useState(false);
 
   if (!profileUser) {
@@ -55,7 +69,7 @@ const Profile = () => {
 
     let newFollowersLi = [...followersLi];
     let newFollowingLi = [...followingLi];
-    const hasFollowed = newFollowersLi.includes(user.id);
+    const hasFollowed = newFollowersLi.includes(user?.id);
     if (hasFollowed) {
       newFollowersLi = newFollowersLi.filter((id) => id !== user.id);
       newFollowingLi = newFollowersLi.filter((id) => id !== profileUser?.$id);
@@ -67,9 +81,12 @@ const Profile = () => {
     setFollowingLi(newFollowingLi);
     followUser(profileUser?.$id, newFollowersLi, user.id, newFollowingLi);
     setLoading(false);
-    console.log(newFollowersLi);
-    console.log(newFollowingLi);
+    //console.log(newFollowersLi);
+    //console.log(newFollowingLi);
   };
+  //console.log("followers list:");
+  //console.log(followersLi);
+  //console.log(followingLi);
 
   return (
     <div className="profile-container">

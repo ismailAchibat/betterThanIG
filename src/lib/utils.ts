@@ -58,5 +58,8 @@ export const checkIsLiked = (likeList: string[], userId: string) => {
 };
 
 export const checkIsFollowing = (followingList: string[], userId: string) => {
+  if (!followingList) {
+    return false; 
+  }
   return followingList.includes(userId);
 }
